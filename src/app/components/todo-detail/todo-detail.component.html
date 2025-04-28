@@ -1,0 +1,62 @@
+<div class="todo-detail-container" *ngIf="todo">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2>{{ todo.title }}</h2>
+      <div class="status-badge">
+        <span class="badge" [ngClass]="{'badge-success': todo.completed, 'badge-warning': !todo.completed}">
+          {{ todo.completed ? 'Completed' : 'Pending' }}
+        </span>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <div class="description">
+        <h4>Description:</h4>
+        <p>{{ todo.description || 'No description provided' }}</p>
+      </div>
+      
+      <div class="dates mt-4">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Created:</strong> {{ todo.createdDate | date:'medium' }}</p>
+          </div>
+          <div class="col-md-6" *ngIf="todo.completed && todo.completedDate">
+            <p><strong>Completed:</strong> {{ todo.completedDate | date:'medium' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card-footer">
+      <div class="d-flex justify-content-between">
+        <div>
+          <button class="btn btn-primary me-2" (click)="goBack()">
+            <i class="fa fa-arrow-left"></i> Back
+          </button>
+          <button class="btn btn-warning me-2" (click)="editTodo()">
+            <i class="fa fa-edit"></i> Edit
+          </button>
+        </div>
+        <div>
+          <button class="btn btn-success me-2" *ngIf="!todo.completed" (click)="toggleStatus()">
+            <i class="fa fa-check"></i> Mark Complete
+          </button>
+          <button class="btn btn-secondary me-2" *ngIf="todo.completed" (click)="toggleStatus()">
+            <i class="fa fa-undo"></i> Mark Incomplete
+          </button>
+          <button class="btn btn-danger" (click)="deleteTodo()">
+            <i class="fa fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="alert alert-info" *ngIf="!todo && !errorMessage">
+  Loading todo details...
+</div>
+
+<div class="alert alert-danger" *ngIf="errorMessage">
+  {{ errorMessage }}
+</div>

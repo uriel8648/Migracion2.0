@@ -1,0 +1,119 @@
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Todo List (Angular View)</h3>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">{{editMode ? 'Edit Todo' : 'Add New Todo'}}</h3>
+              </div>
+              <div class="panel-body">
+                <form (ngSubmit)="saveTodo()">
+                  <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" class="form-control" id="title" [(ngModel)]="newTodo.title" name="title" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" [(ngModel)]="newTodo.description" name="description" rows="3"></textarea>
+                  </div>
+                  
+                  <div class="form-group" *ngIf="editMode">
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" [(ngModel)]="newTodo.completed" name="completed">
+                        Mark as completed
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group">
+                    <button type="submit" class="btn btn-primary">{{editMode ? 'Update' : 'Add'}}</button>
+                    <button type="button" class="btn btn-default" (click)="cancelEdit()" *ngIf="editMode">Cancel</button>
+                    <button type="button" class="btn btn-xs btn-danger" (click)="toggleNextPage()" *ngIf="showNext">
+                      <i class="glyphicon glyphicon-forward"></i>
+                    </button>
+                    <button type="button" class="btn btn-xs btn-danger" (click)="togglePrevPage()" *ngIf="showPrev">
+                      <i class="glyphicon glyphicon-backward"></i>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-8">
+            <div class="alert alert-info" *ngIf="todos.length === 0">
+              No todo items found. Create a new one!
+            </div>
+            
+            <table class="table table-striped table-hover" *ngIf="todos.length > 0">
+              <thead>
+                <tr>
+                  <th>ID <button type="button" class="btn btn-xs btn-danger" (click)="toggleSortField('ID')">
+                    <i class="fa fa-sort"></i>
+                  </button></th>
+                  <th>Title <button type="button" class="btn btn-xs btn-danger" (click)="toggleSortField('TITLE')">
+                    <i class="fa fa-sort"></i>
+                  </button></th>
+                 <th>Description</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let todo of todos; let i = index">
+                  <td>{{todo.id}}</td>
+                  <td [class.completed]="todo.completed">{{todo.title}}</td>
+                  <div class="todo-details">
+                    <p>{{ todo.description }}</p>
+                    <div class="todo-meta">
+                      <span class="created-date">Created: {{ todo.createdDate | date:'medium' }}</span>
+                      <span *ngIf="todo.completed && todo.completedDate" class="completed-date">Completed: {{ todo.completedDate | date:'medium' }}</span>
+                    </div>
+                  </div>
+                   <td>
+                    <span class="label" [ngClass]="{'label-success': todo.completed, 'label-warning': !todo.completed}">
+                      {{todo.completed ? 'Completed' : 'Pending'}}
+                    </span>
+                  </td>
+                 
+                  <td class="task-actions">
+                    <button type="button" class="btn btn-xs btn-primary" (click)="editTodo(todo, i)">
+                      <i class="fa fa-edit"></i>Edit
+                    </button>
+                    <button type="button" class="btn btn-xs" 
+                            [ngClass]="{'btn-warning': todo.completed, 'btn-success': !todo.completed}"
+                            (click)="toggleStatus(todo)">
+                            <i class="fa" [ngClass]="{'fa-check': !todo.completed, 'fa-undo': todo.completed}"></i>
+                            {{ todo.completed ? 'Incomplete' : 'Complete' }}
+                    </button>
+                    <button type="button" class="btn btn-xs btn-danger" (click)="deleteTodo(todo.id, i)">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+             
+            </table>
+            <div class="pagination-controls">
+              <button [disabled]="!showPrev" (click)="togglePrevPage()" class="pagination-btn">
+                <i class="fa fa-arrow-left"></i> Previous
+              </button>
+              <span class="page-indicator">Page {{ nextPage }}</span>
+              <button [disabled]="!showNext" (click)="toggleNextPage()" class="pagination-btn">
+                Next <i class="fa fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,102 @@
+
+<div class="todo-container">
+  <!-- Todo List Header -->
+  <div class="todo-header">
+    <h2>My Todo List</h2>
+    <div class="sort-controls">
+      <span>Sort by: </span>
+      <button class="sort-button" (click)="toggleSortField('ID')" [ngClass]="{'active': sortField === 'ID'}">
+        ID <i *ngIf="sortField === 'ID'" [ngClass]="{'fa-arrow-up': sortOrder === 'asc', 'fa-arrow-down': sortOrder === 'desc'}" class="fa"></i>
+      </button>
+      <button class="sort-button" (click)="toggleSortField('title')" [ngClass]="{'active': sortField === 'title'}">
+        Title <i *ngIf="sortField === 'title'" [ngClass]="{'fa-arrow-up': sortOrder === 'asc', 'fa-arrow-down': sortOrder === 'desc'}" class="fa"></i>
+      </button>
+      <button class="sort-button" (click)="toggleSortField('createdDate')" [ngClass]="{'active': sortField === 'createdDate'}">
+        Created Date <i *ngIf="sortField === 'createdDate'" [ngClass]="{'fa-arrow-up': sortOrder === 'asc', 'fa-arrow-down': sortOrder === 'desc'}" class="fa"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Todo List -->
+  <div class="todo-list">
+    <div *ngIf="todos.length === 0" class="empty-state">
+      <p>No todos found. Add a new one below!</p>
+    </div>
+
+    <div *ngFor="let todo of todos; let i = index" class="todo-item" [ngClass]="{'completed': todo.completed}">
+      <div class="todo-content">
+        <div class="todo-checkbox">
+          <input type="checkbox" [id]="'todo-' + todo.id" [checked]="todo.completed" (change)="toggleStatus(todo)" aria-label="Mark as completed">
+        </div>
+        <div class="todo-details">
+          <h3 [ngClass]="{'completed-text': todo.completed}">{{ todo.title }}</h3>
+          <p *ngIf="todo.description">{{ todo.description }}</p>
+          <div class="todo-meta">
+            <span class="created-date">Created: {{ todo.createdDate | date:'medium' }}</span>
+            <span *ngIf="todo.completed && todo.completedDate" class="completed-date">Completed: {{ todo.completedDate | date:'medium' }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="todo-actions">
+        <button class="edit-btn" (click)="editTodo(todo, i)" aria-label="Edit todo">
+          <i class="fa fa-edit"></i> Edit
+        </button>
+        <button class="delete-btn" (click)="todo.id !== undefined && deleteTodo(todo.id, i)" aria-label="Delete todo">
+          <i class="fa fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- Todo Form -->
+  <div class="todo-form-container">
+    <h3>{{ editMode ? 'Edit Todo' : 'Add New Todo' }}</h3>
+    <form (ngSubmit)="saveTodo()" #todoForm="ngForm">
+      <div class="form-group">
+        <label for="todoTitle">Title *</label>
+        <input 
+          type="text" 
+          id="todoTitle" 
+          name="title" 
+          [(ngModel)]="newTodo.title" 
+          required 
+          #title="ngModel"
+          placeholder="What needs to be done?">
+        <div *ngIf="title.invalid && (title.dirty || title.touched)" class="error-message">
+          Title is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="todoDescription">Description</label>
+        <textarea 
+          id="todoDescription" 
+          name="description" 
+          [(ngModel)]="newTodo.description" 
+          placeholder="Add details (optional)"></textarea>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input 
+            type="checkbox" 
+            name="completed" 
+            [ngModel]="newTodo.completed" 
+            (ngModelChange)="newTodo.completed = $event">
+          Completed
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="!title.valid" class="save-btn">
+          {{ editMode ? 'Update' : 'Add' }} Todo
+        </button>
+        <button type="button" *ngIf="editMode" (click)="cancelEdit()" class="cancel-btn">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

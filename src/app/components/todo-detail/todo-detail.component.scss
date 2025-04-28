@@ -1,0 +1,110 @@
+/* 
+ * Todo Detail Component Styles
+ * 
+ * This file contains styles specific to the Todo Detail component.
+ * These styles were extracted from inline styles in the original AngularJS application
+ * and organized into a component-specific SCSS file.
+ */
+
+// Card styling for the todo detail view
+.todo-detail-card {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+// Header styling
+.todo-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  
+  h2 {
+    margin: 0;
+    color: #333;
+  }
+}
+
+// Status badge styling
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  
+  &.completed {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  &.pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+}
+
+// Description section
+.todo-description {
+  margin: 15px 0;
+  line-height: 1.5;
+  color: #555;
+}
+
+// Metadata section
+.todo-metadata {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 15px;
+  
+  .metadata-item {
+    margin-bottom: 5px;
+  }
+}
+
+// Action buttons
+.action-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  
+  button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    
+    &.edit-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      
+      &:hover {
+        background-color: #0069d9;
+      }
+    }
+    
+    &.back-button {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      
+      &:hover {
+        background-color: #5a6268;
+      }
+    }
+    
+    &.delete-button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      
+      &:hover {
+        background-color: #c82333;
+      }
+    }
+  }
+}

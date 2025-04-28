@@ -1,0 +1,121 @@
+/* 
+ * Styles for the todo-form component
+ * This file contains styles specific to the todo form component
+ */
+
+// Form container styling
+.todo-form {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+}
+
+// Form group styling
+.form-group {
+  margin-bottom: 15px;
+}
+
+// Form control styling
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  
+  &:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+}
+
+// Label styling
+label {
+  font-weight: 500;
+  margin-bottom: 5px;
+  display: block;
+}
+
+// Textarea specific styling
+textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+// Button group styling
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+// Button styling
+button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  border: 1px solid transparent;
+  
+  &.btn-primary {
+    background-color: #007bff;
+    color: white;
+    
+    &:hover {
+      background-color: #0069d9;
+    }
+    
+    &:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+  }
+  
+  &.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    
+    &:hover {
+      background-color: #5a6268;
+    }
+  }
+  
+  &.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    
+    &:hover {
+      background-color: #c82333;
+    }
+  }
+}
+
+// Checkbox styling
+.form-check {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  
+  input[type="checkbox"] {
+    margin-right: 8px;
+  }
+}
+
+// Error message styling
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 5px;
+}
+
+// Edit mode indicator
+.edit-mode-indicator {
+  background-color: #fff3cd;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  border-left: 4px solid #ffc107;
+}

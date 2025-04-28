@@ -1,0 +1,54 @@
+<div class="todo-form-container">
+  <h2>{{ editMode ? 'Edit Todo' : 'Add New Todo' }}</h2>
+  
+  <form [formGroup]="todoForm" (ngSubmit)="saveTodo()">
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input 
+        type="text" 
+        id="title" 
+        class="form-control" 
+        formControlName="title" 
+        required>
+      <div *ngIf="todoForm.get('title')?.invalid && (todoForm.get('title')?.dirty || todoForm.get('title')?.touched)" class="text-danger">
+        <small *ngIf="todoForm.get('title')?.errors?.['required']">Title is required</small>
+        <small *ngIf="todoForm.get('title')?.errors?.['maxlength']">Title is too long</small>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea 
+        id="description" 
+        class="form-control" 
+        formControlName="description" 
+        rows="3">
+      </textarea>
+    </div>
+    
+    <div class="form-check mb-3">
+      <input 
+        type="checkbox" 
+        id="completed" 
+        class="form-check-input" 
+        formControlName="completed">
+      <label class="form-check-label" for="completed">Completed</label>
+    </div>
+    
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="btn btn-primary" 
+        [disabled]="todoForm.invalid">
+        {{ editMode ? 'Update' : 'Create' }}
+      </button>
+      
+      <button 
+        type="button" 
+        class="btn btn-secondary ms-2" 
+        (click)="cancelEdit()">
+        Cancel
+      </button>
+    </div>
+  </form>
+</div>
