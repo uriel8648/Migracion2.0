@@ -59,18 +59,31 @@ export class AppComponent implements OnInit {
     this.loadTodos();
   }
 
-  loadTodos(): void {
+loadTodos(): void {
     this.loading = true;
     this.errorMessage = '';
 
-    // Pass sortField as is (uppercase) and currentPage + 1 for 1-based page number
-    this.todoService.getTodos(this.sortField, this.sortAscending ? 'asc' : 'desc', this.currentPage + 1)
+    this.todoService.getTodos(this.sortField.toLowerCase(), this.sortAscending ? 'asc' : 'desc', this.currentPage + 1)
       .pipe(
         finalize(() => this.loading = false)
       )
       .subscribe({
         next: (data: Todo[]) => {
           this.allTodos = data;
+          // Client-side sorting fallback
+          this.allTodos.sort((a, b) => {
+            let fieldA = (a as any)[this.sortField.toLowerCase()];
+            let fieldB = (b as any)[this.sortField.toLowerCase()];
+            if (fieldA == null) fieldA = '';
+            if (fieldB == null) fieldB = '';
+            if (typeof fieldA === 'string') {
+              fieldA = fieldA.toLowerCase();
+              fieldB = fieldB.toLowerCase();
+            }
+            if (fieldA < fieldB) return this.sortAscending ? -1 : 1;
+            if (fieldA > fieldB) return this.sortAscending ? 1 : -1;
+            return 0;
+          });
           // Slice data to pageSize items for pagination
           this.updatePagedTodos();
           // Update pagination controls based on data length and currentPage
