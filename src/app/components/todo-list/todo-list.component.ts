@@ -10,6 +10,9 @@ import { Observable, of } from 'rxjs';
   styleUrls: ['./todo-list.component.scss']
 })
 export class TodoListComponent implements OnInit {
+  // Constant for page size
+  readonly PAGE_SIZE = 10;
+
   // Collection of todos
   todos: Todo[] = [];
   
@@ -56,10 +59,10 @@ export class TodoListComponent implements OnInit {
         })
       )
       .subscribe((data: Todo[]) => {
-        this.todos = data;
+        this.todos = data.slice(0, this.PAGE_SIZE);
         
         // Determine if pagination controls should be shown
-        this.showNext = this.todos.length > 9;
+        this.showNext = this.todos.length >= this.PAGE_SIZE;
         this.showPrev = this.currentPage > 1;
       });
   }

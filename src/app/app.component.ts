@@ -27,13 +27,16 @@ export class AppComponent implements OnInit {
   newTodo: Todo = this.resetTodoForm();
   editMode = false;
   editIndex = -1;
-  
+
   // Pagination properties
   currentPage = 0;
   pageSize = 10;
   showNext = false;
   showPrev = false;
-  
+
+  allTodos: Todo[] = []; // store all todos fetched from backend
+  pagedTodos: Todo[] = []; // todos to display on current page
+
   // Sorting properties
   sortField = 'ID';
   sortAscending = true;
@@ -56,32 +59,53 @@ export class AppComponent implements OnInit {
     this.loadTodos();
   }
 
-  /**
-   * Loads todos from the backend with current sorting and pagination
-   */
   loadTodos(): void {
     this.loading = true;
     this.errorMessage = '';
-    
-    const apiSortField = this.sortField.toLowerCase();
-    
-    this.todoService.getTodos(apiSortField, this.sortAscending ? 'asc' : 'desc', this.currentPage + 1)
+
+    // Pass sortField as is (uppercase) and currentPage + 1 for 1-based page number
+    this.todoService.getTodos(this.sortField, this.sortAscending ? 'asc' : 'desc', this.currentPage + 1)
       .pipe(
         finalize(() => this.loading = false)
       )
       .subscribe({
         next: (data: Todo[]) => {
-          this.todos = data;
-          // Update pagination flags
-          this.showNext = this.todos.length === this.pageSize;
+          this.allTodos = data;
+          // Slice data to pageSize items for pagination
+          this.updatePagedTodos();
+          // Update pagination controls based on data length and currentPage
           this.showPrev = this.currentPage > 0;
+          this.showNext = (this.currentPage + 1) * this.pageSize < this.allTodos.length;
+          console.log('loadTodos: pagedTodos.length=', this.pagedTodos.length, 'currentPage=', this.currentPage);
         },
         error: (error: any) => {
           console.error('Error loading todos:', error);
           this.errorMessage = 'Failed to load todos. Please try again later.';
         }
       });
-    
+  }
+
+  updatePagedTodos(): void {
+    const startIndex = this.currentPage * this.pageSize;
+    this.pagedTodos = this.allTodos.slice(startIndex, startIndex + this.pageSize);
+    this.showPrev = this.currentPage > 0;
+    this.showNext = (startIndex + this.pageSize) < this.allTodos.length;
+  }
+
+  toggleNextPage(): void {
+    if (this.showNext) {
+      this.currentPage++;
+      this.updatePagedTodos();
+      console.log('Next page clicked, currentPage:', this.currentPage);
+    }
+  }
+
+  togglePrevPage(): void {
+    if (this.showPrev) {
+      this.currentPage--;
+      this.updatePagedTodos();
+      console.log('Previous page clicked, currentPage:', this.currentPage);
+    }
   }
 
   /**
@@ -95,24 +119,6 @@ export class AppComponent implements OnInit {
       this.sortAscending = true;
     }
     this.loadTodos();
-  }
-
-  /**
-   * Pagination: go to next page
-   */
-  toggleNextPage(): void {
-    this.currentPage++;
-    this.loadTodos();
-  }
-
-  /**
-   * Pagination: go to previous page
-   */
-  togglePrevPage(): void {
-    if (this.currentPage > 0) {
-      this.currentPage--;
-      this.loadTodos();
-    }
   }
 
   /**
@@ -266,9 +272,11 @@ export class AppComponent implements OnInit {
     };
   }
  
+  
   get nextPage(): number {
-    return this.currentPage;
+    return this.currentPage + 1;
   }
+
 
   
 }
