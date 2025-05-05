@@ -153,7 +153,7 @@ loadTodos(): void {
         )
         .subscribe({
           next: (updatedTodo: Todo) => {
-            this.todos[this.editIndex] = updatedTodo;
+            this.pagedTodos[this.editIndex] = updatedTodo;
             this.resetForm();
           },
         error: (error: any) => {
@@ -221,9 +221,9 @@ loadTodos(): void {
       .subscribe({
         next: (result: Todo) => {
           // Find and update the todo in our local array
-          const index = this.todos.findIndex(t => t.id === result.id);
+          const index = this.pagedTodos.findIndex(t => t.id === result.id);
           if (index !== -1) {
-            this.todos[index] = result;
+            this.pagedTodos[index] = result;
           }
         },
         error: (error: any) => {
@@ -251,7 +251,7 @@ loadTodos(): void {
         )
         .subscribe({
           next: () => {
-            this.todos.splice(index, 1);
+            this.pagedTodos.splice(index, 1);
           },
         error: (error: any) => {
           console.error('Error deleting todo:', error);

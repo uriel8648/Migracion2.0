@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, BehaviorSubject  } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Todo } from '../models/todo.model';
 import { environment } from '../../environments/environment';
@@ -22,6 +22,13 @@ export class TodoService {
   
   constructor(private http: HttpClient) {}
 
+  private todoSource = new BehaviorSubject<any>(null);
+  todo$ = this.todoSource.asObservable();
+
+  setTodo(todo: any) {
+    this.todoSource.next(todo);
+  }
+  
   /**
    * Fetches todos with sorting and pagination
    * @param sortField Field to sort by

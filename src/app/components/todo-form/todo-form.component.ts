@@ -4,6 +4,7 @@ import { finalize, catchError } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 import { TodoService } from '../../services/todo.service';
 import { Todo } from '../../models/todo.model';
+import { Router } from '@angular/router'
 
 @Component({
   selector: 'app-todo-form',
@@ -33,7 +34,8 @@ export class TodoFormComponent implements OnInit {
 
   constructor(
     private todoService: TodoService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     // Initialize the form with validators
     this.todoForm = this.fb.group({
@@ -46,7 +48,9 @@ export class TodoFormComponent implements OnInit {
 
   ngOnInit(): void {
     // Load todos when component initializes
-    this.loadTodos();
+    this.todoService.todo$.subscribe(todo => {
+      this.editTodo(todo);
+    });
   }
 
   // Navigation methods
@@ -123,8 +127,8 @@ export class TodoFormComponent implements OnInit {
         })
       )
       .subscribe(createdTodo => {
-        this.todos.push(createdTodo);
         this.resetForm();
+        this.router.navigate(['/todos']);
       });
   }
 
@@ -152,10 +156,9 @@ export class TodoFormComponent implements OnInit {
         })
       )
       .subscribe(updatedTodo => {
-        if (this.editIndex >= 0 && this.editIndex < this.todos.length) {
-          this.todos[this.editIndex] = updatedTodo;
-        }
-        this.resetForm();
+       this.resetForm();
+       this.editMode = false;
+       this.router.navigate(['/todos']);
       });
   }
 
@@ -201,8 +204,7 @@ export class TodoFormComponent implements OnInit {
   }
 
   // Edit a todo - load it into the form
-  editTodo(todo: Todo, index: number): void {
-    // Create a deep copy to avoid modifying the original until save
+  editTodo( todo: Todo): void {
     this.todoForm.setValue({
       id: todo.id,
       title: todo.title,
@@ -210,12 +212,15 @@ export class TodoFormComponent implements OnInit {
       completed: todo.completed
     });
     this.editMode = true;
-    this.editIndex = index;
+    // Create a deep copy to avoid modifying the original until save
+    //this.editIndex = todo.id;
   }
 
   // Cancel editing
   cancelEdit(): void {
     this.resetForm();
+    this.editMode = false;
+    this.router.navigate(['/todos']);
   }
 
   // Reset the form and edit state

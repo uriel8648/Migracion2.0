@@ -1,9 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { Todo } from '../../models/todo.model';
 import { TodoService } from '../../services/todo.service';
-import { finalize, catchError } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { Todo } from '../../models/todo.model';
+import { finalize } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
+/**
+ * AppComponent - Main component that replaces the AngularJS TodoController
+ * 
+ * Migration notes:
+ * - Converted $scope properties to component class properties
+ * - Replaced $http calls with TodoService that uses HttpClient
+ * - Implemented OnInit lifecycle hook instead of controller initialization
+ * - Converted ng-model to [(ngModel)] for two-way binding
+ * - Moved sorting and pagination logic to component methods
+ * - Added proper TypeScript types to all variables
+ * - Added loading state for better UX
+ * - Improved error handling with RxJS operators
+ */
 @Component({
   selector: 'app-todo-list',
   templateUrl: './todo-list.component.html',
@@ -15,198 +28,260 @@ export class TodoListComponent implements OnInit {
 
   // Collection of todos
   todos: Todo[] = [];
-  
-  // Model for new/edited todo
-  newTodo: Todo = this.getEmptyTodo();
-  
-  // Editing state
+  newTodo: Todo = this.resetTodoForm();
   editMode = false;
   editIndex = -1;
-  
-  // Pagination and sorting
-  sortOrder: 'asc' | 'desc' = 'asc';
-  sortField: string = 'ID';
-  currentPage = 1;
+
+  // Pagination properties
+  currentPage = 0;
+  pageSize = 10;
   showNext = false;
   showPrev = false;
-  
-  // Loading state
+
+  allTodos: Todo[] = []; // store all todos fetched from backend
+  pagedTodos: Todo[] = []; // todos to display on current page
+
+  // Sorting properties
+  sortField = 'ID';
+  sortAscending = true;
+
+  // UI state properties
   loading = false;
+  errorMessage = '';
 
-  constructor(private todoService: TodoService) {}
 
-  get nextPage(): number {
-    return this.currentPage;
+  /**
+   * Constructor with dependency injection
+   * Replaces AngularJS $http with TodoService
+   */
+  constructor(private todoService: TodoService, private router: Router) {}
+
+  /**
+   * Lifecycle hook that replaces the controller initialization
+   */
+  ngOnInit(): void {
+    this.loadTodos();
   }
 
-  ngOnInit(): void {
-    // Load todos when component initializes
+loadTodos(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.todoService.getTodos(this.sortField.toLowerCase(), this.sortAscending ? 'asc' : 'desc', this.currentPage + 1)
+      .pipe(
+        finalize(() => this.loading = false)
+      )
+      .subscribe({
+        next: (data: Todo[]) => {
+          this.allTodos = data;
+          // Client-side sorting fallback
+          this.allTodos.sort((a, b) => {
+            let fieldA = (a as any)[this.sortField.toLowerCase()];
+            let fieldB = (b as any)[this.sortField.toLowerCase()];
+            if (fieldA == null) fieldA = '';
+            if (fieldB == null) fieldB = '';
+            if (typeof fieldA === 'string') {
+              fieldA = fieldA.toLowerCase();
+              fieldB = fieldB.toLowerCase();
+            }
+            if (fieldA < fieldB) return this.sortAscending ? -1 : 1;
+            if (fieldA > fieldB) return this.sortAscending ? 1 : -1;
+            return 0;
+          });
+          // Slice data to pageSize items for pagination
+          this.updatePagedTodos();
+          // Update pagination controls based on data length and currentPage
+          this.showPrev = this.currentPage > 0;
+          this.showNext = (this.currentPage + 1) * this.pageSize < this.allTodos.length;
+          console.log('loadTodos: pagedTodos.length=', this.pagedTodos.length, 'currentPage=', this.currentPage);
+        },
+        error: (error: any) => {
+          console.error('Error loading todos:', error);
+          this.errorMessage = 'Failed to load todos. Please try again later.';
+        }
+      });
+  }
+
+  updatePagedTodos(): void {
+    const startIndex = this.currentPage * this.pageSize;
+    this.pagedTodos = this.allTodos.slice(startIndex, startIndex + this.pageSize);
+    this.showPrev = this.currentPage > 0;
+    this.showNext = (startIndex + this.pageSize) < this.allTodos.length;
+  }
+
+  toggleNextPage(): void {
+    if (this.showNext) {
+      this.currentPage++;
+      this.updatePagedTodos();
+      console.log('Next page clicked, currentPage:', this.currentPage);
+    }
+  }
+
+  togglePrevPage(): void {
+    if (this.showPrev) {
+      this.currentPage--;
+      this.updatePagedTodos();
+      console.log('Previous page clicked, currentPage:', this.currentPage);
+    }
+  }
+
+  /**
+   * Toggles the sort field and direction
+   */
+  toggleSortField(field: string): void {
+    if (this.sortField === field) {
+      this.sortAscending = !this.sortAscending;
+    } else {
+      this.sortField = field;
+      this.sortAscending = true;
+    }
     this.loadTodos();
   }
 
   /**
-   * Loads todos with current pagination and sorting parameters
+   * Saves a new todo or updates an existing one
    */
-  loadTodos(): void {
-    this.loading = true;
-    this.todoService.getTodos(this.sortField, this.sortOrder, this.currentPage)
-      .pipe(
-        finalize(() => this.loading = false),
-        catchError(error => {
-          console.error('Error loading todos:', error);
-          alert('Failed to load todos. Check console for details.');
-          return of([]);
-        })
-      )
-      .subscribe((data: Todo[]) => {
-        this.todos = data.slice(0, this.PAGE_SIZE);
-        
-        // Determine if pagination controls should be shown
-        this.showNext = this.todos.length >= this.PAGE_SIZE;
-        this.showPrev = this.currentPage > 1;
-      });
-  }
-
-  /**
-   * Creates a new todo
-   */
-  createTodo(): void {
-    if (!this.newTodo.title) {
-      alert('Title is required!');
+  saveTodo(): void {
+    if (!this.newTodo.title.trim()) {
+      this.errorMessage = 'Title is required';
       return;
     }
-    
-    this.loading = true;
-    this.todoService.createTodo(this.newTodo)
-      .pipe(
-        finalize(() => this.loading = false),
-        catchError(error => {
-          console.error('Error creating todo:', error);
-          alert('Failed to create todo. Check console for details.');
-          return of(null);
-        })
-      )
-      .subscribe(response => {
-        if (response) {
-          this.todos.push(response);
-          this.resetForm();
-        }
-      });
-  }
 
-  /**
-   * Updates an existing todo
-   */
-  updateTodo(): void {
-    if (!this.newTodo.title) {
-      alert('Title is required!');
-      return;
-    }
-    
-    if (!this.newTodo.id) {
-      console.error('Cannot update todo without ID');
-      return;
-    }
-    
     this.loading = true;
-    this.todoService.updateTodo(this.newTodo)
-      .pipe(
-        finalize(() => this.loading = false),
-        catchError(error => {
-          console.error('Error updating todo:', error);
-          alert('Failed to update todo. Check console for details.');
-          return of(null);
-        })
-      )
-      .subscribe(response => {
-        if (response && this.editIndex >= 0) {
-          this.todos[this.editIndex] = response;
-          this.resetForm();
-        }
-      });
-  }
+    this.errorMessage = '';
 
-  /**
-   * Deletes a todo
-   * @param id The ID of the todo to delete
-   * @param index The index in the todos array
-   */
-  deleteTodo(id: number, index: number): void {
-    if (confirm('Are you sure you want to delete this todo?')) {
-      this.loading = true;
-      this.todoService.deleteTodo(id)
+    if (this.editMode) {
+      this.todoService.updateTodo(this.newTodo)
         .pipe(
-          finalize(() => this.loading = false),
-          catchError(error => {
-            console.error('Error deleting todo:', error);
-            alert('Failed to delete todo. Check console for details.');
-            return of(false);
-          })
+          finalize(() => this.loading = false)
         )
-        .subscribe(success => {
-          if (success) {
-            this.todos.splice(index, 1);
+        .subscribe({
+          next: (updatedTodo: Todo) => {
+            this.pagedTodos[this.editIndex] = updatedTodo;
+            this.resetForm();
+          },
+        error: (error: any) => {
+          console.error('Error updating todo:', error);
+          this.errorMessage = 'Failed to update todo. Please try again.';
+        }
+        });
+    } else {
+      this.todoService.createTodo(this.newTodo)
+        .pipe(
+          finalize(() => this.loading = false)
+        )
+        .subscribe({
+          next: (createdTodo: Todo) => {
+            // Only add to the current view if we're on the first page or if appropriate for the current sort
+            if (this.currentPage === 0) {
+              this.todos.unshift(createdTodo);
+            }
+            this.resetForm();
+            // Reload to ensure proper sorting and pagination
+            this.loadTodos();
+          },
+          error: (error: any) => {
+            console.error('Error creating todo:', error);
+            this.errorMessage = 'Failed to create todo. Please try again.';
           }
         });
     }
   }
 
   /**
-   * Toggles the completed status of a todo
-   * @param todo The todo to toggle
-   */
-  toggleStatus(todo: Todo): void {
-    const originalStatus = todo.completed;
-    todo.completed = !todo.completed;
-    
-    this.todoService.toggleTodoStatus(todo.id!)
-      .pipe(
-        catchError(error => {
-          console.error('Error toggling todo status:', error);
-          alert('Failed to update todo status. Check console for details.');
-          todo.completed = originalStatus;
-          return of(null);
-        })
-      )
-      .subscribe(response => {
-        if (response) {
-          // Update the todo with the response data
-          Object.assign(todo, response);
-        }
-      });
-  }
-
-  /**
-   * Sets up form for editing a todo
-   * @param todo The todo to edit
-   * @param index The index in the todos array
+   * Prepares the form for editing an existing todo
    */
   editTodo(todo: Todo, index: number): void {
-    this.newTodo = { ...todo };
-    this.editMode = true;
-    this.editIndex = index;
+    console.log(todo);
+    //this.editMode = true;
+    //this.editIndex = index;
+    // Create a copy to avoid modifying the original until save
+    //this.newTodo = { ...todo };
+    this.todoService.setTodo(todo);
+    this.router.navigate(['/todos', index +1, 'edit']);
   }
 
   /**
-   * Cancels the current edit operation
+   * Cancels the edit operation
    */
   cancelEdit(): void {
     this.resetForm();
   }
 
   /**
-   * Resets the form to its initial state
+   * Toggles the completion status of a todo
    */
-  resetForm(): void {
-    this.newTodo = this.getEmptyTodo();
-    this.editMode = false;
-    this.editIndex = -1;
+  toggleStatus(todo: Todo): void {
+    this.loading = true;
+    this.errorMessage = '';
+    
+    const updatedTodo: Todo = { 
+      ...todo, 
+      completed: !todo.completed,
+      completedDate: !todo.completed ? new Date() : null
+    };
+    
+    this.todoService.updateTodo(updatedTodo)
+      .pipe(
+        finalize(() => this.loading = false)
+      )
+      .subscribe({
+        next: (result: Todo) => {
+          // Find and update the todo in our local array
+          const index = this.pagedTodos.findIndex(t => t.id === result.id);
+          if (index !== -1) {
+            this.pagedTodos[index] = result;
+          }
+        },
+        error: (error: any) => {
+          console.error('Error toggling todo status:', error);
+          this.errorMessage = 'Failed to update todo status. Please try again.';
+        }
+      });
   }
 
   /**
-   * Creates an empty Todo object
+   * Deletes a todo
    */
-  private getEmptyTodo(): Todo {
+  deleteTodo(id: number | undefined, index: number): void {
+    if (id === undefined) {
+      console.warn('deleteTodo called with undefined id');
+      return;
+    }
+    if (confirm('Are you sure you want to delete this todo?')) {
+      this.loading = true;
+      this.errorMessage = '';
+      
+      this.todoService.deleteTodo(id)
+        .pipe(
+          finalize(() => this.loading = false)
+        )
+        .subscribe({
+          next: () => {
+            this.pagedTodos.splice(index, 1);
+          },
+        error: (error: any) => {
+          console.error('Error deleting todo:', error);
+          this.errorMessage = 'Failed to delete todo. Please try again.';
+        }
+        });
+    }
+  }
+
+  /**
+   * Resets the form to default values
+   */
+  private resetForm(): void {
+    this.newTodo = this.resetTodoForm();
+    this.editMode = false;
+    this.editIndex = -1;
+    this.errorMessage = '';
+  }
+
+  /**
+   * Creates an empty todo object
+   */
+  private resetTodoForm(): Todo {
     return {
       id: undefined,
       title: '',
@@ -216,57 +291,12 @@ export class TodoListComponent implements OnInit {
       completedDate: null
     };
   }
-
-  /**
-   * Saves a todo (creates or updates based on edit mode)
-   */
-  saveTodo(): void {
-    if (this.editMode) {
-      this.updateTodo();
-    } else {
-      this.createTodo();
-    }
+ 
+  
+  get nextPage(): number {
+    return this.currentPage + 1;
   }
 
-  /**
-   * Navigates to the next page
-   */
-  toggleNextPage(): void {
-    this.currentPage++;
-    this.loadTodos();
-    this.resetForm();
-  }
 
-  /**
-   * Navigates to the previous page
-   */
-  togglePrevPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.loadTodos();
-      this.resetForm();
-    }
-  }
-
-  /**
-   * Changes the sort field and handles sort order
-   * @param newValue The field to sort by
-   */
-  toggleSortField(newValue: string): void {
-    if (this.sortField === newValue) {
-      this.toggleSortOrder();
-    } else {
-      this.sortOrder = 'asc';
-    }
-    this.sortField = newValue;
-    this.loadTodos();
-    this.resetForm();
-  }
-
-  /**
-   * Toggles between ascending and descending sort order
-   */
-  toggleSortOrder(): void {
-    this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-  }
+  
 }
