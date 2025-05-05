@@ -297,6 +297,14 @@ loadTodos(): void {
     return this.currentPage + 1;
   }
 
+  /**
+   * Show details of a todo by navigating to the details route
+   */
+  showDetails(todo: Todo, index: number): void {
+    this.todoService.setTodo(todo);
+    this.router.navigate(['/todos', todo.id]);
+  }
+
 
   
 }

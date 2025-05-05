@@ -52,6 +52,9 @@
                     <button type="button" class="btn btn-xs btn-primary" (click)="editTodo(todo, i)">
                       <i class="fa fa-edit"></i>Edit
                     </button>
+                    <button type="button" class="btn btn-xs btn-info" (click)="showDetails(todo, i)">
+                      <i class="fa fa-info-circle"></i>Details
+                    </button>
                     <button type="button" class="btn btn-xs" 
                             [ngClass]="{'btn-warning': todo.completed, 'btn-success': !todo.completed}"
                             (click)="toggleStatus(todo)">
@@ -59,7 +62,7 @@
                             {{ todo.completed ? 'Incomplete' : 'Complete' }}
                     </button>
                     <button type="button" class="btn btn-xs btn-danger" (click)="deleteTodo(todo.id, i)">
-                      <i class="fa fa-trash"></i>
+                      <i class="fa fa-trash"></i> Delete
                     </button>
                   </td>
                 </tr>
@@ -69,11 +72,11 @@
             <div class="pagination-controls">
             
               <button type="button" class="btn btn-xs btn-danger" (click)="togglePrevPage()" *ngIf="showPrev">
-                <i class="fa fa-backward"></i>Previous
+                <i class="fa fa-backward"></i> Previous
               </button>
               <span class="page-indicator">Page {{ nextPage }}</span>
               <button type="button" class="btn btn-xs btn-danger" (click)="toggleNextPage()" >
-                <i class="fa fa-forward"></i>Next
+                <i class="fa fa-forward"></i> Next
               </button>
             </div>
           </div>

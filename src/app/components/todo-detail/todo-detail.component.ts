@@ -121,10 +121,10 @@ export class TodoDetailComponent implements OnInit {
   }
 
   /**
-   * Enable edit mode for this todo
+   * Enable edit mode for this todo by navigating to the edit route
    */
   editTodo(): void {
-    this.editMode = true;
+    this.router.navigate(['/todos', this.todoId, 'edit']);
   }
 
   /**
