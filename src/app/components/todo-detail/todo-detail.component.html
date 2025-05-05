@@ -1,18 +1,29 @@
 <div class="todo-detail-container" *ngIf="todo">
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h2>{{ todo.title }}</h2>
-      <div class="status-badge">
-        <span class="badge" [ngClass]="{'badge-success': todo.completed, 'badge-warning': !todo.completed}">
-          {{ todo.completed ? 'Completed' : 'Pending' }}
-        </span>
-      </div>
+      <h6>View Todo</h6>
     </div>
     
     <div class="card-body">
+      <div class="title">
+        <h4>{{ todo.title }}</h4>
+      </div>
       <div class="description">
-        <h4>Description:</h4>
         <p>{{ todo.description || 'No description provided' }}</p>
+      </div>
+
+      <div>
+        <p><strong>ID:</strong>
+        <span class="">
+          {{ todo.id}}
+        </span>
+      </div>
+
+      <div>
+        <p><strong>Status:</strong>
+        <span class="status-badge" [ngClass]="{'completed-card': todo.completed, 'pending-card': !todo.completed}">
+          {{ todo.completed ? 'Completed' : 'Pending' }}
+        </span>
       </div>
       
       <div class="dates mt-4">

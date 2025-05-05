@@ -17,10 +17,10 @@
             <table class="table table-striped table-hover" *ngIf="pagedTodos.length > 0">
               <thead>
                 <tr>
-                  <th>ID <button type="button" class="btn btn-xs btn-danger" (click)="toggleSortField('ID')">
+                  <th>ID <button type="button" class="btn btn-sm btn-danger" (click)="toggleSortField('ID')">
                     <i class="fa fa-sort"></i>
                   </button></th>
-                  <th>Title <button type="button" class="btn btn-xs btn-danger" (click)="toggleSortField('TITLE')">
+                  <th>Title <button type="button" class="btn btn-sm btn-danger" (click)="toggleSortField('TITLE')">
                     <i class="fa fa-sort"></i>
                   </button></th>
                  <th>Description</th>
@@ -43,25 +43,32 @@
                     </div>
                   </div>
                    <td>
-                    <span class="label" [ngClass]="{'label-success': todo.completed, 'label-warning': !todo.completed}">
+                    <span class="status-badge" [ngClass]="{'completed-card': todo.completed, 'pending-card': !todo.completed}">
                       {{todo.completed ? 'Completed' : 'Pending'}}
                     </span>
                   </td>
                  
                   <td class="task-actions">
-                    <button type="button" class="btn btn-xs btn-primary" (click)="editTodo(todo, i)">
-                      <i class="fa fa-edit"></i>Edit
-                    </button>
-                    <button type="button" class="btn btn-xs btn-info" (click)="showDetails(todo, i)">
+                    <!--Detail button-->
+                    <button type="button" class="btn btn-xs btn-info m-1" (click)="showDetails(todo, i)">
                       <i class="fa fa-info-circle"></i>Details
                     </button>
-                    <button type="button" class="btn btn-xs" 
+
+                    <!--Edit button-->
+                    <button type="button" class="btn btn-xs btn-primary m-1" (click)="editTodo(todo, i)">
+                      <i class="fa fa-edit"></i>Edit
+                    </button>
+                    
+                    <!--Complete button-->
+                    <button type="button" class="btn btn-xs m-1" 
                             [ngClass]="{'btn-warning': todo.completed, 'btn-success': !todo.completed}"
                             (click)="toggleStatus(todo)">
                             <i class="fa" [ngClass]="{'fa-check': !todo.completed, 'fa-undo': todo.completed}"></i>
                             {{ todo.completed ? 'Incomplete' : 'Complete' }}
                     </button>
-                    <button type="button" class="btn btn-xs btn-danger" (click)="deleteTodo(todo.id, i)">
+
+                    <!--Delete button-->
+                    <button type="button" class="btn btn-xs btn-danger m-1" (click)="deleteTodo(todo.id, i)">
                       <i class="fa fa-trash"></i> Delete
                     </button>
                   </td>

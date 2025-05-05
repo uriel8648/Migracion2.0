@@ -115,7 +115,28 @@
 .create-div{
   button{
     background-color: #45a049;
-    margin: 1%
+    margin: 2% 1%
   }
 }
 
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 1%;
+  
+  &.completed-card {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  &.pending-card {
+    background-color: #fff3cd;
+    color:   #f0ad4e; 
+  }
+}
+.btn-info{
+  color: #fff
+}

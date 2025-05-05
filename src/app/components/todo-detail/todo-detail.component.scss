@@ -7,6 +7,14 @@
  */
 
 // Card styling for the todo detail view
+.todo-detail-container{
+  width: 60%;
+  margin: auto;
+}
+.card-header{
+  background-color: #337ab7;
+  color: white;
+}
 .todo-detail-card {
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -21,7 +29,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
-  
+  background-color: #337ab7;
   h2 {
     margin: 0;
     color: #333;
@@ -35,15 +43,16 @@
   border-radius: 4px;
   font-size: 12px;
   font-weight: bold;
+  margin-left: 1%;
   
-  &.completed {
+  &.completed-card {
     background-color: #d4edda;
     color: #155724;
   }
   
-  &.pending {
+  &.pending-card {
     background-color: #fff3cd;
-    color: #856404;
+    color:   #f0ad4e; 
   }
 }
 
