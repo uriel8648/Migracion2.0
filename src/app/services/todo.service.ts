@@ -29,6 +29,10 @@ export class TodoService {
     this.todoSource.next(todo);
   }
   
+  clearTodo() {
+    this.todoSource.next(null);
+  }
+  
   /**
    * Fetches todos with sorting and pagination
    * @param sortField Field to sort by

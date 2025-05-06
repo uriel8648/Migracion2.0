@@ -127,6 +127,7 @@ export class TodoFormComponent implements OnInit {
         })
       )
       .subscribe(createdTodo => {
+        console.log('Todo created:', createdTodo);
         this.resetForm();
         this.router.navigate(['/todos']);
       });
@@ -158,6 +159,7 @@ export class TodoFormComponent implements OnInit {
       .subscribe(updatedTodo => {
        this.resetForm();
        this.editMode = false;
+       this.todoService.clearTodo();
        this.router.navigate(['/todos']);
       });
   }
@@ -220,6 +222,7 @@ export class TodoFormComponent implements OnInit {
   cancelEdit(): void {
     this.resetForm();
     this.editMode = false;
+    this.todoService.clearTodo();
     this.router.navigate(['/todos']);
   }
 
