@@ -49,6 +49,24 @@ export class TodoListComponent implements OnInit {
   loading = false;
   errorMessage = '';
 
+  // Mapping of tags to emojis and colors
+  tagStyles: {[key: string]: {emoji: string, color: string}} = {
+    'Yoga': { emoji: '🧘‍♂️', color: '#ef6f82' },
+    'Gym': { emoji: '🏋️‍♀️', color: '#000000' },
+    'Videogames': { emoji: '🎮', color: '#FFD700' },
+    'Study': { emoji: '📚', color: '#7bab6d' },
+    'Work': { emoji: '💼', color: '#FFA07A' }
+  };
+
+  // Common tags with emojis and colors
+  commonTags: {name: string, emoji: string, color: string}[] = [
+    { name: 'Yoga', emoji: '🧘‍♂️', color: '#FFB6C1' },
+    { name: 'GYM', emoji: '🏋️‍♀️', color: '#87CEEB' },
+    { name: 'Videogames', emoji: '🎮', color: '#FFD700' },
+    { name: 'Study', emoji: '📚', color: '#90EE90' },
+    { name: 'Work', emoji: '💼', color: '#FFA07A' }
+  ];
+
 
   /**
    * Constructor with dependency injection
@@ -305,6 +323,41 @@ loadTodos(): void {
     this.router.navigate(['/todos', todo.id]);
   }
 
+  // Helper to get emoji and color for a tag
+  getTagStyle(tag: string): {emoji: string, color: string} {
+    return this.tagStyles[tag] || { emoji: '🏷️', color: '#D3D3D3' };
+  }
 
-  
+  // Toggle tag selection for a todo
+  toggleTag(todo: Todo, tag: string): void {
+    if (!todo.tags) {
+      todo.tags = [];
+    }
+    const index = todo.tags.indexOf(tag);
+    if (index === -1) {
+      todo.tags.push(tag);
+    } else {
+      todo.tags.splice(index, 1);
+    }
+    // Update the todo via service
+    this.todoService.updateTodo(todo).subscribe({
+      next: updatedTodo => {
+        // Update local pagedTodos with updated todo
+        const i = this.pagedTodos.findIndex(t => t.id === updatedTodo.id);
+        if (i !== -1) {
+          this.pagedTodos[i] = updatedTodo;
+        }
+      },
+      error: err => {
+        console.error('Failed to update todo tags', err);
+        alert('Failed to update todo tags. Please try again.');
+      }
+    });
+  }
+
+  // Check if tag is selected
+  isTagSelected(todo: Todo, tag: string): boolean {
+    if (!todo.tags) return false;
+    return todo.tags.includes(tag);
+  }
 }

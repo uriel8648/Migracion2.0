@@ -32,6 +32,15 @@ export class TodoFormComponent implements OnInit {
   // Track loading state for UI feedback
   loading = false;
 
+  // Common tags with emojis and colors
+  commonTags: {name: string, emoji: string, color: string}[] = [
+    { name: 'Yoga', emoji: '🧘‍♂️', color: '#FFB6C1' },
+    { name: 'GYM', emoji: '🏋️‍♀️', color: '#87CEEB' },
+    { name: 'Videogames', emoji: '🎮', color: '#FFD700' },
+    { name: 'Study', emoji: '📚', color: '#90EE90' },
+    { name: 'Work', emoji: '💼', color: '#FFA07A' }
+  ];
+
   constructor(
     private todoService: TodoService,
     private fb: FormBuilder,
@@ -42,7 +51,10 @@ export class TodoFormComponent implements OnInit {
       id: [null],
       title: ['', [Validators.required, Validators.maxLength(100)]],
       description: [''],
-      completed: [false]
+      completed: [false],
+      createdDate: [''],
+      createdTime: [''],
+      tags: ['']
     });
   }
 
@@ -51,6 +63,32 @@ export class TodoFormComponent implements OnInit {
     this.todoService.todo$.subscribe(todo => {
       this.editTodo(todo);
     });
+  }
+
+  // Toggle tag selection
+  toggleTag(tagName: string): void {
+    const tagsControl = this.todoForm.get('tags');
+    if (!tagsControl) return;
+
+    let tagsArray = tagsControl.value ? tagsControl.value.split(',').map((t: string) => t.trim()) : [];
+
+    const index = tagsArray.indexOf(tagName);
+    if (index === -1) {
+      tagsArray.push(tagName);
+    } else {
+      tagsArray.splice(index, 1);
+    }
+
+    tagsControl.setValue(tagsArray.join(', '));
+  }
+
+  // Check if tag is selected
+  isTagSelected(tagName: string): boolean {
+    const tagsControl = this.todoForm.get('tags');
+    if (!tagsControl || !tagsControl.value) return false;
+
+    const tagsArray = tagsControl.value.split(',').map((t: string) => t.trim());
+    return tagsArray.includes(tagName);
   }
 
   // Navigation methods
@@ -114,7 +152,14 @@ export class TodoFormComponent implements OnInit {
       return;
     }
 
-    const newTodo: Todo = this.todoForm.value;
+    // Convert tags string to array
+    const formValue = this.todoForm.value;
+    const tagsArray = formValue.tags ? formValue.tags.split(',').map((tag: string) => tag.trim()) : [];
+    const newTodo: Todo = {
+      ...formValue,
+      tags: tagsArray
+    };
+
     this.loading = true;
     
     this.todoService.createTodo(newTodo)
@@ -144,7 +189,14 @@ export class TodoFormComponent implements OnInit {
       return;
     }
 
-    const todoToUpdate: Todo = this.todoForm.value;
+    // Convert tags string to array
+    const formValue = this.todoForm.value;
+    const tagsArray = formValue.tags ? formValue.tags.split(',').map((tag: string) => tag.trim()) : [];
+    const todoToUpdate: Todo = {
+      ...formValue,
+      tags: tagsArray
+    };
+
     this.loading = true;
     
     this.todoService.updateTodo(todoToUpdate)
@@ -207,11 +259,26 @@ export class TodoFormComponent implements OnInit {
 
   // Edit a todo - load it into the form
   editTodo( todo: Todo): void {
+    // Extract date and time from createdDate if available
+    let createdDate = '';
+    let createdTime = '';
+    if (todo.createdDate) {
+      const dateObj = new Date(todo.createdDate);
+      createdDate = dateObj.toISOString().substring(0, 10); // yyyy-mm-dd
+      createdTime = dateObj.toTimeString().substring(0, 5); // HH:mm
+    }
+
+    // Convert tags array to comma-separated string
+    const tagsString = todo.tags ? todo.tags.join(', ') : '';
+
     this.todoForm.setValue({
       id: todo.id,
       title: todo.title,
       description: todo.description || '',
-      completed: todo.completed
+      completed: todo.completed,
+      createdDate: createdDate,
+      createdTime: createdTime,
+      tags: tagsString
     });
     this.editMode = true;
     // Create a deep copy to avoid modifying the original until save
@@ -232,7 +299,10 @@ export class TodoFormComponent implements OnInit {
       id: null,
       title: '',
       description: '',
-      completed: false
+      completed: false,
+      createdDate: '',
+      createdTime: '',
+      tags: ''
     });
     this.editMode = false;
     this.editIndex = -1;

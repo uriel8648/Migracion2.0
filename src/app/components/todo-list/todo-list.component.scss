@@ -137,6 +137,30 @@
     color:   #f0ad4e; 
   }
 }
+
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  margin: 0 0.25rem 0.25rem 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: white;
+  border-radius: 9999px; /* pill shape */
+  cursor: default;
+  user-select: none;
+  transition: background-color 0.3s ease;
+}
+
+.tag-badge:hover {
+  filter: brightness(85%);
+}
+
+.tag-badge::before {
+  content: '#';
+  margin-right: 0.3rem;
+  font-weight: 700;
+}
 .btn-info{
   color: #fff
 }

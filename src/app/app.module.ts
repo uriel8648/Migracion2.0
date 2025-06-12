@@ -22,7 +22,9 @@ import { AppRoutingModule } from './app-routing.module';
     AppComponent,
     TodoListComponent,
     TodoFormComponent,
-    TodoDetailComponent
+    TodoDetailComponent,
+    // Added CommonTagsComponent
+    CommonTagsComponent
   ],
   imports: [
     BrowserModule,
@@ -39,3 +41,5 @@ import { AppRoutingModule } from './app-routing.module';
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+import { CommonTagsComponent } from './components/common-tags/common-tags.component';

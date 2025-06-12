@@ -12,6 +12,7 @@ export interface Todo {
   completed: boolean;
   createdDate?: Date | null;
   completedDate?: Date | null;
+  tags?: string[];
 }
 
 /**
@@ -39,6 +40,7 @@ export class TodoModel implements Todo {
   completed: boolean = false;
   createdDate?: Date | null;
   completedDate?: Date | null = null;
+  tags?: string[] = [];
 
   constructor(todo?: Partial<Todo>) {
     if (todo) {
@@ -46,6 +48,7 @@ export class TodoModel implements Todo {
       this.title = todo.title || '';
       this.description = todo.description || '';
       this.completed = todo.completed || false;
+      this.tags = todo.tags || [];
       
       // Handle date conversion if the dates come as strings from the API
       if (todo.createdDate !== undefined && todo.createdDate !== null) {
